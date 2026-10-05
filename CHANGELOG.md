@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.2 — 2026-10-05
+
+- Fixed the production Android export defect where `Export Full Recovery Project` wrote only to Godot `user://` app-private storage.
+- The primary recovery export now opens Android's native save flow and produces the complete recovery project as a user-visible ZIP at the destination selected by the user.
+- Removed silent fallback behavior that could report success after redirecting report or project ZIP output into app-private storage. Export failures are surfaced as failures.
+- App-private storage remains only as temporary working/staging space while assembling the recovery project; the user-facing result is copied to the selected Android document destination.
+- Increased Android `versionCode` to `152` and release name to `1.5.2`.
+
 ## 1.5.1 — 2026-10-04
 
 - Reworked the Android application around rebuild-oriented recovery rather than report-only analysis.
