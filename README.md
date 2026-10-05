@@ -342,15 +342,21 @@ See **[SECURITY.md](SECURITY.md)** for repository and signing policy.
 - **[Changelog](CHANGELOG.md)**
 - **[Security Policy](SECURITY.md)**
 - **[Contributing](CONTRIBUTING.md)**
+- **[Engineering Agent Contract](AGENTS.md)**
+- **[Release Gates](docs/RELEASE_GATES.md)**
+- **[Current Handoff](docs/HANDOFF.md)**
+- **[v1.5.2 Release Record](release/v1.5.2/README.md)**
 - **[v1.5.1 Release Record](release/v1.5.1/README.md)**
 
 ---
 
 ## Project status
 
-**v1.5.1** is the current public rebuild-oriented release.
+**v1.5.2** is the current public source/release line.
 
-The current implementation includes portrait-only Android operation, project-isolated exports, exact DEX preservation, Dalvik code-item extraction, framework-aware recovery, native evidence extraction, Function Hunt, diagnostics, machine-readable inventories, and complete project ZIP export.
+The current implementation includes portrait-only Android operation, project-isolated exports, exact DEX preservation, Dalvik code-item extraction, framework-aware recovery, native evidence extraction, Function Hunt, diagnostics, machine-readable inventories, and complete project ZIP export through Android's native save flow.
+
+The v1.5.2 static build/package validation record is complete. Physical Android user-visible export acceptance is tracked separately and is not implied by static, headless, or package-level checks. See **[Current Handoff](docs/HANDOFF.md)** and **[Release Gates](docs/RELEASE_GATES.md)**.
 
 ---
 
