@@ -1,38 +1,84 @@
+<div align="center">
+
 # BG Gremlin APK Recovery
 
-**Background Gremlin Group — don't do evil**
+### Android disaster recovery, reconstruction, and rebuild-oriented extraction
 
-BG Gremlin APK Recovery is an offline Android APK disaster-recovery and reconstruction toolkit. It is designed to preserve a target APK exactly, identify where application logic survives, and export as much rebuild-relevant material as the package actually contains.
+**Background Gremlin Group**  
+*don't do evil*
 
-The current public release is **v1.5.1**, built with **Godot 4.7.2 stable** for Android. The application is **portrait-only** and performs analysis locally on the selected APK.
+![Version](https://img.shields.io/badge/version-1.5.1-a6ff00?style=for-the-badge&labelColor=111111)
+![Platform](https://img.shields.io/badge/platform-Android-a6ff00?style=for-the-badge&labelColor=111111)
+![Engine](https://img.shields.io/badge/Godot-4.7.2-a6ff00?style=for-the-badge&labelColor=111111)
+![Mode](https://img.shields.io/badge/analysis-offline-a6ff00?style=for-the-badge&labelColor=111111)
 
-## Recovery goals
+**Preserve the APK. Find the logic. Recover everything that survived. Export a rebuild workspace.**
 
-The project is intentionally preservation-first. It keeps the original packaged bytes and builds structured recovery material around them rather than replacing unknown data with guesses.
+</div>
 
-A recovery project can contain:
+---
 
-- the untouched source APK;
-- the complete non-directory APK ZIP tree;
-- compiled `AndroidManifest.xml` and `resources.arsc`;
-- every `classes*.dex` file;
-- complete DEX string tables;
-- DEX class descriptors and surviving source-file names;
-- DEX method IDs, class descriptors, names, and prototype descriptors;
-- encoded-method metadata and exact original 16-bit Dalvik code units for reachable `code_item` entries;
-- obfuscated class and member identifiers exactly as present in the APK;
-- surviving Java, Kotlin, C#, Dart, JavaScript, TypeScript, web, configuration, SQL, source-map, protocol, and other source/text artifacts;
-- Flutter, React Native/Hermes, Unity, Xamarin/.NET, Cordova/Capacitor, and Godot payloads when present;
-- native shared libraries organized by ABI;
-- printable evidence recovered from native and other binary payloads;
-- ProGuard/R8 mappings, source maps, symbols, PDB/MDB/debug material, and other name-recovery artifacts when present;
-- human-readable and machine-readable reports, inventories, checksums, and reconstruction guidance.
+BG Gremlin APK Recovery is an **offline Android APK disaster-recovery toolkit** built for situations where the original project is damaged, incomplete, inaccessible, or gone.
 
-Obfuscation is not treated as a reason to discard code. If identifiers were renamed or minified, BG Gremlin APK Recovery preserves those identifiers and the underlying bytecode evidence. It does not invent pre-obfuscation names that are absent from the APK.
+It does not treat an APK as a black box to summarize. It treats it as a recovery source.
 
-## Per-project export layout
+The application preserves the original package, identifies the application stack, evaluates likely obfuscation, locates recoverable logic, extracts rebuild-relevant artifacts, inventories native and framework payloads, and exports a deterministic recovery project that can be worked from directly.
 
-Each analyzed APK receives a deterministic project workspace:
+> **Core rule:** if code or metadata still exists in the APK, preserve it — even when names are obfuscated, structure is ugly, or reconstruction is incomplete.
+
+---
+
+## What it actually recovers
+
+| Area | Recovery output |
+|---|---|
+| **Original APK** | Exact untouched copy of the analyzed package |
+| **APK filesystem** | Complete non-directory ZIP tree with traversal-safe extraction |
+| **DEX bytecode** | Every `classes*.dex` file preserved byte-for-byte |
+| **DEX strings** | Complete decoded DEX string tables |
+| **DEX classes** | Class descriptors and surviving source-file metadata |
+| **DEX methods** | Method IDs, classes, names, prototypes, and access metadata |
+| **Dalvik code** | Exact original 16-bit instruction code units for reachable `code_item` entries |
+| **Obfuscated code** | Preserved exactly as encoded instead of being filtered out |
+| **Android resources** | `AndroidManifest.xml`, `resources.arsc`, and packaged resources |
+| **Source-like files** | Java, Kotlin, C#, Dart, JS, TS, HTML, CSS, SQL, maps, config, and other surviving text |
+| **Framework payloads** | Flutter, React Native/Hermes, Unity, Xamarin/.NET, Cordova/Capacitor, Godot |
+| **Native code** | ABI-separated `.so` libraries plus printable binary evidence |
+| **Name recovery** | R8/ProGuard mappings, source maps, symbols, PDB/MDB/debug artifacts when present |
+| **Reports** | TXT, HTML, JSON, CSV inventories, checksums, and project metadata |
+
+Obfuscation does **not** make code disposable. If R8/ProGuard or another tool has renamed classes and methods, BG Gremlin APK Recovery keeps those identifiers and the underlying executable evidence exactly as shipped.
+
+What it does **not** do is fabricate original names, comments, Git history, or source files that no longer exist.
+
+---
+
+## Recovery pipeline
+
+```mermaid
+flowchart LR
+    A[Select APK] --> B[Read-only staging]
+    B --> C[APK / ZIP analysis]
+    C --> D[Stack detection]
+    C --> E[DEX integrity + metadata]
+    C --> F[Resources + manifest]
+    C --> G[Native / framework payloads]
+    D --> H[Function Hunt]
+    E --> I[Rebuild-oriented extraction]
+    F --> I
+    G --> I
+    H --> I
+    I --> J[Per-project workspace]
+    J --> K[Export Project ZIP]
+```
+
+The source APK is treated as evidence. Recovery happens into a separate project workspace.
+
+---
+
+## One APK, one project folder
+
+Every analyzed APK is exported beneath its own deterministic directory:
 
 ```text
 BGGremlinAPKRecovery/
@@ -41,11 +87,18 @@ BGGremlinAPKRecovery/
         ├── raw_apk/
         │   ├── original.apk
         │   └── tree/
+        │
         ├── rebuild/
         │   ├── AndroidManifest.xml
         │   ├── resources/
         │   ├── dex/
+        │   │   ├── classes*.dex
+        │   │   ├── *.strings.txt
+        │   │   ├── *.classes.tsv
+        │   │   ├── *.methods.tsv
+        │   │   └── *.code-items.txt
         │   └── REBUILD_GUIDE.txt
+        │
         ├── recovered_sources/
         ├── framework_payloads/
         ├── native/
@@ -57,41 +110,163 @@ BGGremlinAPKRecovery/
         └── project_manifest.json
 ```
 
-`Export Full Recovery Project` creates the working directory. `Export Project ZIP` packages the same workspace into a portable archive using Android's system save flow.
+This prevents output from separate APKs from being mixed together and makes exported projects reproducible by source SHA-256.
 
-See [docs/RECOVERY_OUTPUT.md](docs/RECOVERY_OUTPUT.md) for the export contract.
+See **[Recovery Output Contract](docs/RECOVERY_OUTPUT.md)** for the complete layout.
 
-## Stack detection
+---
 
-The analyzer recognizes:
+## Supported application stacks
 
-- native Android / Java / Kotlin;
-- Jetpack Compose;
-- Godot Engine;
-- Flutter;
-- React Native / Hermes;
-- Unity Mono / IL2CPP;
-- Xamarin / .NET MAUI;
-- Cordova / Ionic / Capacitor;
-- native-heavy APKs.
+| Stack | Detection | Recovery focus |
+|---|:---:|---|
+| Native Android / Java / Kotlin | ✓ | DEX, resources, manifest, assets |
+| Jetpack Compose | ✓ | DEX, Compose classes, resources |
+| Godot Engine | ✓ | PCK/resources, compiled scripts, Android bridge |
+| Flutter | ✓ | `libapp.so`, Flutter assets, snapshots/kernel artifacts |
+| React Native / Hermes | ✓ | JS/Hermes bundles, source maps, native modules |
+| Unity Mono | ✓ | Managed assemblies, metadata, assets |
+| Unity IL2CPP | ✓ | `global-metadata.dat`, `libil2cpp.so`, serialized data |
+| Xamarin / .NET MAUI | ✓ | Managed assemblies/stores, symbols, native bridge |
+| Cordova / Ionic / Capacitor | ✓ | Packaged web application, source maps, plugins |
+| Native-heavy APKs | ✓ | JNI bridges, ELF libraries, binary evidence |
 
-Function Hunt searches DEX class descriptors, method names, DEX strings, filenames, source/text assets, case-insensitive ASCII remnants, and UTF-16LE remnants in binary payloads.
+---
+
+## Function Hunt
+
+Function Hunt is designed for the situation where you remember **behavior**, not structure.
+
+Searches include:
+
+- DEX class descriptors
+- DEX method names
+- DEX string tables
+- packaged filenames
+- source/text assets
+- case-insensitive ASCII remnants in binary payloads
+- UTF-16LE remnants in native and binary files
+
+Useful search targets include function names, URLs, log text, preference keys, API paths, exception strings, UI text, feature names, and other behavioral anchors.
+
+---
+
+## DEX recovery
+
+The DEX parser validates and inventories:
+
+- DEX magic and version
+- declared file size
+- header size
+- endian tag
+- SHA-1 header signature
+- Adler-32 checksum
+- string, type, method, and class tables
+- table bounds
+- encoded class data
+- reachable method `code_item` structures
+
+For encoded methods, the recovery export records:
+
+- method index
+- direct / virtual classification
+- class descriptor
+- method name
+- prototype descriptor
+- access flags
+- `code_off`
+- register count
+- input/output register counts
+- try block count
+- debug-info offset
+- instruction count
+- **exact original 16-bit Dalvik code units**
+
+That output remains useful even when readable symbol names have been destroyed by obfuscation.
+
+The original `classes*.dex` files are always preserved alongside these decoded inventories and remain the authoritative bytecode source.
+
+---
 
 ## Diagnostics
 
-The diagnostics layer checks DEX magic/version, declared file size, header size, endian tag, SHA-1 header signature, Adler-32 checksum, structural table bounds, duplicate provider authorities, APK signing-block markers, JAR/v1 signature metadata, ZIP-entry alignment, native ABI inventory, and ZIP64 metadata.
+BG Gremlin APK Recovery also performs packaging and structural checks that are useful before attempting reconstruction:
 
-Release validation additionally uses Android Build Tools such as `apksigner` and `zipalign`.
+- DEX structural and integrity validation
+- duplicate Android provider-authority detection
+- APK Signing Block scheme markers
+- JAR/v1 signature metadata detection
+- ZIP entry alignment checks
+- ZIP64 parsing
+- native ABI inventory
+- application category / `isGame`
+- package, version, min SDK, and target SDK
+- recoverable artifact classification
+- likely R8/ProGuard-style obfuscation estimation
 
-## Portrait-only Android application
+Static signing diagnostics are intentionally distinguished from cryptographic verification. Release validation uses Android Build Tools such as `apksigner` and `zipalign`.
 
-v1.5.1 is intentionally portrait-only.
+---
 
-- Godot project setting: `display/window/handheld/orientation=1`
-- runtime request: `DisplayServer.screen_set_orientation(DisplayServer.SCREEN_PORTRAIT)`
-- Android activity export: portrait orientation
+## Export modes
 
-## Repository layout
+### Export Full Recovery Project
+
+Creates the complete working recovery directory under the application's output root.
+
+### Export Project ZIP
+
+Packages the full project into a portable ZIP suitable for copying off-device, archiving, or continuing reconstruction on a workstation.
+
+Android `content://` destinations are handled through internal staging and stream copy-out rather than assuming direct filesystem access.
+
+---
+
+## Portrait-only by design
+
+The Android application is intentionally portrait-only.
+
+```text
+Godot project: display/window/handheld/orientation = 1
+Runtime:       DisplayServer.SCREEN_PORTRAIT
+Android:       portrait activity orientation
+```
+
+The UI is designed around a vertical analysis and recovery workflow rather than a rotated desktop layout.
+
+---
+
+## Build
+
+Requirements:
+
+- Godot **4.7.2 stable**
+- matching Godot 4.7.2 Android export templates
+- JDK 17
+- Android SDK Platform 36
+- Android Build Tools 36.x
+- Android Platform Tools
+
+Package:
+
+```text
+org.backgroundgremlin.apkrecovery
+```
+
+Current release:
+
+```text
+Version:      1.5.1
+Version code: 151
+```
+
+Full instructions: **[BUILDING.md](BUILDING.md)**
+
+The repository intentionally uses **no GitHub Actions workflows**. Builds and release validation are performed locally.
+
+---
+
+## Repository map
 
 ```text
 .
@@ -100,46 +275,90 @@ v1.5.1 is intentionally portrait-only.
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
 ├── SECURITY.md
+│
 ├── docs/
+│   ├── ARCHITECTURE.md
+│   └── RECOVERY_OUTPUT.md
+│
 ├── release/
 │   └── v1.5.1/
+│
 └── source/
     └── project/
+        ├── analyzer.gd
+        ├── main.gd
+        ├── main.tscn
+        ├── project.godot
+        ├── export_presets.cfg
+        ├── addons/
+        └── scripts/
 ```
 
-This public repository contains the sanitized public source and documentation only. Private development history, historical signing material, and internal-only artifacts are not mirrored here.
+This public repository contains the sanitized public source and documentation only. Private development history, historical signing material, credentials, and internal-only artifacts are not mirrored here.
 
-There are **no GitHub Actions workflows**. Builds are performed locally so repository activity does not consume Actions credits.
+---
 
-## Build requirements
+## What recovery cannot recreate
 
-- Godot 4.7.2 stable
-- matching Godot 4.7.2 Android export templates
-- JDK 17
-- Android SDK Platform 36
-- Android Build Tools 36.x
-- Android Platform Tools
+An APK is a compiled delivery artifact, not a source-control archive.
 
-Package: `org.backgroundgremlin.apkrecovery`
+If the following information was removed before packaging, it cannot be reconstructed from bytes that are no longer present:
 
-Version: `1.5.1`
+- deleted comments
+- Git history
+- original branch structure
+- source-only documentation
+- build-system files never shipped
+- pre-obfuscation identifiers without surviving mappings
+- signing private keys
+- developer-local configuration
 
-Android version code: `151`
+BG Gremlin APK Recovery handles that boundary explicitly: **preserve what exists, decode what can be decoded, and never substitute invented source for missing evidence.**
 
-See [BUILDING.md](BUILDING.md) for the local build and validation procedure.
+---
 
-## Recovery limits
+## Security model
 
-APK recovery is constrained by what was actually shipped. Deleted comments, Git history, source-only files, and pre-obfuscation identifiers that are absent from the package cannot be recreated from nonexistent bytes. BG Gremlin APK Recovery therefore prioritizes exact preservation of packaged DEX/native/framework content and explicit metadata over fabricated source.
+The selected APK is treated as **untrusted data**, not something to execute.
 
-## Security and signing
+The recovery path is designed to:
 
-Private signing keys, passwords, tokens, credentials, and internal development history are intentionally excluded from this public repository. Use the protected signing key that owns your Android package when update-signature continuity matters.
+- avoid executing packaged application code;
+- sanitize extracted paths;
+- prevent ZIP path traversal;
+- bounds-check parser reads;
+- preserve original bytes when higher-level parsing is incomplete;
+- keep signing secrets out of the repository and application;
+- separate source APK evidence from recovery output.
 
-See [SECURITY.md](SECURITY.md).
+See **[SECURITY.md](SECURITY.md)** for repository and signing policy.
 
-## Project stewardship
+---
 
-BG Gremlin APK Recovery is maintained by **Background Gremlin Group** for legitimate software recovery, interoperability, reverse engineering, security research, and disaster-recovery work where the operator is authorized to analyze the application.
+## Documentation
 
-**Background Gremlin Group — don't do evil.**
+- **[Building](BUILDING.md)**
+- **[Architecture](docs/ARCHITECTURE.md)**
+- **[Recovery Output Contract](docs/RECOVERY_OUTPUT.md)**
+- **[Changelog](CHANGELOG.md)**
+- **[Security Policy](SECURITY.md)**
+- **[Contributing](CONTRIBUTING.md)**
+- **[v1.5.1 Release Record](release/v1.5.1/README.md)**
+
+---
+
+## Project status
+
+**v1.5.1** is the current public rebuild-oriented release.
+
+The current implementation includes portrait-only Android operation, project-isolated exports, exact DEX preservation, Dalvik code-item extraction, framework-aware recovery, native evidence extraction, Function Hunt, diagnostics, machine-readable inventories, and complete project ZIP export.
+
+---
+
+<div align="center">
+
+### Background Gremlin Group
+
+**Build defensively. Recover precisely. Don't do evil.**
+
+</div>
