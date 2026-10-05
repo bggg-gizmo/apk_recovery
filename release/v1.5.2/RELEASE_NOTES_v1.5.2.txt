@@ -1,0 +1,36 @@
+BG Gremlin APK Recovery v1.5.2
+Release notes — 2026-10-05
+
+Production hotfix for Android user-visible recovery export.
+
+Fixed:
+- The primary full-project export no longer reports success for a recovery workspace left only in app-private Godot user:// storage.
+- The primary action now uses Android's native save flow and exports the complete recovery project as a portable ZIP to the user-selected destination.
+- Report export no longer silently falls back into app-private storage when the selected destination fails.
+- Project ZIP export no longer silently falls back into app-private storage when the selected destination fails.
+- User-facing success text identifies the selected destination.
+- Recovery-project metadata is versioned as 1.5.2.
+- Android versionCode is 152 and versionName is 1.5.2.
+
+Preserved:
+- untouched source APK preservation;
+- complete packaged ZIP tree extraction;
+- raw DEX preservation and DEX string/class/method/code-item evidence;
+- obfuscated/minified identifier preservation;
+- recovered source/text artifacts;
+- framework payload collection;
+- ABI-separated native binaries and printable string evidence;
+- obfuscation/debug artifacts;
+- binary evidence;
+- TXT/HTML/JSON/CSV inventories, project manifest, checksums, and rebuild guidance;
+- portrait-only Android UI;
+- unique FileProvider and AndroidX InitializationProvider authorities;
+- arm64-v8a, armeabi-v7a, and x86_64 targets.
+
+Validation:
+Static build/package validation passed, including Godot compile/import, ZIP integrity, 16 KiB-capable alignment, v2/v3 signing, package/version/ABI checks, portrait activity orientation, and unique provider authorities.
+
+Physical-device export acceptance was not run because no Android device or emulator was attached. The validation record does not claim that test passed.
+
+Signing:
+The local signed APK uses a local build certificate. The production signing private key was not available, so update compatibility with installed production builds is not asserted. Sign the aligned unsigned APK with the actual protected production key when update compatibility is required.
