@@ -1,0 +1,10 @@
+BG Gremlin APK Recovery v1.5.2 — SHA-256
+
+001c820528e3f2a9a504428ea0bc528d78fe7a31cd395a108a3eea52af5a0ff8  BGGremlinAPKRecovery-v1.5.2.apk
+3071c401ab2897e9ecab42ea69cedb46b8c8cd98b9c276b94d95043d68392385  BGGremlinAPKRecovery-v1.5.2-aligned-unsigned.apk
+fe1996146704cfcf7e0262c220dddf4a333e4424606af97de8d81f1b463f6e0d  BGGremlinAPKRecovery_Godot_Source_v1.5.2.zip
+
+Local signed-build certificate SHA-256:
+ca9c405e73f08e8aada3d6c7389202ebd518a24883ab7d8ccd0a9155a96808b2
+
+The local signed APK is not asserted to use the production/update-compatible signing key. Use the aligned unsigned APK with the actual protected production signing key when update compatibility is required.

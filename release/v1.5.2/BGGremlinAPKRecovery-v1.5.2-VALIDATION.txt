@@ -1,0 +1,57 @@
+BG Gremlin APK Recovery v1.5.2
+Validation record — 2026-10-05
+
+SOURCE / ENGINE
+PASS  Godot 4.7.2 stable headless editor import/compile check completed without GDScript parse or compile errors.
+PASS  v1.5.2 main.gd removes the user-facing full-project export path that wrote directly to analyzer.default_output_root().
+PASS  Primary UI action is Export Full Recovery Project ZIP and opens the native save flow.
+PASS  Report export has no silent fallback to app-private user:// storage.
+PASS  Recovery project ZIP export has no silent fallback to app-private user:// storage.
+PASS  analyzer.gd project metadata reports tool version 1.5.2.
+PASS  Internal content:// handling stages bytes privately only as an implementation detail before copying to the selected final document.
+
+ANDROID PACKAGE
+PASS  Package: org.backgroundgremlin.apkrecovery
+PASS  versionCode: 152
+PASS  versionName: 1.5.2
+PASS  ABIs: arm64-v8a, armeabi-v7a, x86_64
+PASS  GodotApp portrait orientation: android:screenOrientation=1
+PASS  FileProvider authority: org.backgroundgremlin.apkrecovery.fileprovider
+PASS  AndroidX InitializationProvider authority: org.backgroundgremlin.apkrecovery.initprovider
+PASS  Provider authorities are distinct.
+PASS  ZIP archive integrity.
+PASS  16 KiB-capable zipalign validation.
+PASS  APK Signature Scheme v2 verification.
+PASS  APK Signature Scheme v3 verification.
+INFO  APK Signature Scheme v1 is not used.
+
+LOCAL SIGNED BUILD
+Signer DN:
+CN=Background Gremlin Group, OU=APK Recovery, O=Background Gremlin Group, C=US
+
+Signer certificate SHA-256:
+ca9c405e73f08e8aada3d6c7389202ebd518a24883ab7d8ccd0a9155a96808b2
+
+Signer key:
+RSA 4096
+
+IMPORTANT SIGNING BOUNDARY
+The protected production signing private key was not available in this validation environment. The locally signed APK is therefore not claimed to be update-compatible with an already installed production build. The aligned unsigned APK is the candidate to sign with the actual production key.
+
+PHYSICAL ANDROID EXPORT ACCEPTANCE
+NOT RUN  adb devices -l reported no attached physical device or emulator.
+NOT CLAIMED  A real-device Files/Downloads visibility test was not performed in this validation run.
+
+Before production promotion, acceptance requires a physical Android device or representative emulator:
+- analyze a representative APK;
+- tap Export Full Recovery Project ZIP;
+- confirm Android's native save picker opens;
+- select a normal user-visible Downloads/Documents destination;
+- confirm the resulting ZIP is visible there in a standard file manager;
+- verify the ZIP contains the complete SHA-qualified recovery workspace;
+- verify a failed/cancelled save does not claim success and does not silently redirect the final result to user://.
+
+ARTIFACT SHA-256
+001c820528e3f2a9a504428ea0bc528d78fe7a31cd395a108a3eea52af5a0ff8  BGGremlinAPKRecovery-v1.5.2.apk
+3071c401ab2897e9ecab42ea69cedb46b8c8cd98b9c276b94d95043d68392385  BGGremlinAPKRecovery-v1.5.2-aligned-unsigned.apk
+fe1996146704cfcf7e0262c220dddf4a333e4424606af97de8d81f1b463f6e0d  BGGremlinAPKRecovery_Godot_Source_v1.5.2.zip

@@ -135,7 +135,7 @@ func _build_ui() -> void:
     _set_empty_state()
 
     var actions = VBoxContainer.new(); actions.add_theme_constant_override("separation", 7); root.add_child(actions)
-    export_project_button = _button("Export Full Recovery Project", true); export_project_button.disabled = true; export_project_button.pressed.connect(_export_project); actions.add_child(export_project_button)
+    export_project_button = _button("Export Full Recovery Project ZIP", true); export_project_button.disabled = true; export_project_button.pressed.connect(_save_bundle_prompt); actions.add_child(export_project_button)
     var action_row = HBoxContainer.new(); action_row.add_theme_constant_override("separation", 7); actions.add_child(action_row)
     report_button = _button("Export Report", false); report_button.disabled = true; report_button.pressed.connect(_save_report_prompt); action_row.add_child(report_button)
     bundle_button = _button("Export Project ZIP", false); bundle_button.disabled = true; bundle_button.pressed.connect(_save_bundle_prompt); action_row.add_child(bundle_button)
@@ -376,29 +376,6 @@ func _search_done(q: String, hits: Array) -> void:
     if hits.is_empty(): out.append("[color=#777777]No direct hit. Search a behavioral constant: URL, error text, UI label, JSON field, preference key, table name, protocol token or filename.[/color]")
     hunt_text.text = "\n".join(out); _set_status("Function Hunt complete — %d hit(s)." % hits.size(), 100); _set_busy(false)
 
-func _export_project() -> void:
-    if analyzer.analysis.is_empty() or (worker and worker.is_started()): return
-    _set_busy(true)
-    _set_status("Exporting complete rebuild-oriented recovery project", 5)
-    worker = Thread.new()
-    worker.start(Callable(self, "_export_project_worker"))
-
-func _export_project_worker() -> void:
-    var result = analyzer.export_recovery_project(analyzer.default_output_root())
-    call_deferred("_export_project_done", result)
-
-func _export_project_done(result: Dictionary) -> void:
-    if worker and worker.is_started(): worker.wait_to_finish()
-    _set_busy(false)
-    var err := int(result.get("error", ERR_CANT_CREATE))
-    if err == OK:
-        var path := String(result.get("path", ""))
-        _set_status("Full recovery project exported.", 100)
-        _show("Full recovery project exported to its dedicated project folder:\n" + (ProjectSettings.globalize_path(path) if path.begins_with("user://") else path) + "\n\nThe folder contains the untouched APK, complete APK tree, DEX rebuild evidence including obfuscated code items, recovered source/text artifacts, framework payloads, native binaries and string evidence, reports, inventories, checksums and rebuild guidance.")
-    else:
-        _set_status("Recovery project export failed.", 0)
-        _show("Recovery project export failed: " + error_string(err))
-
 func _save_report_prompt() -> void:
     if analyzer.analysis.is_empty(): return
     save_report_dialog.current_file = "BGGremlin-APK-Recovery-%s.txt" % _safe(analyzer.analysis.name)
@@ -406,13 +383,10 @@ func _save_report_prompt() -> void:
 
 func _save_report_to(path: String) -> void:
     var err = analyzer.write_report(path)
-    if err != OK:
-        var fallback = _default_export_dir() + "/BGGremlin-APK-Recovery-%s.txt" % _safe(analyzer.analysis.name)
-        err = analyzer.write_report(fallback)
-        if err == OK: _show("The selected destination was not writable. Report saved to:\n" + ProjectSettings.globalize_path(fallback))
-        else: _show("Report export failed: " + error_string(err))
+    if err == OK:
+        _show("Report saved to the selected user-visible destination:\n" + path)
     else:
-        _show("Report saved:\n" + path)
+        _show("Report export failed. Nothing was silently redirected to app-private storage.\n\n" + error_string(err))
 
 func _save_bundle_prompt() -> void:
     if analyzer.analysis.is_empty(): return
@@ -426,19 +400,15 @@ func _save_bundle_to(path: String) -> void:
 
 func _bundle_worker(path: String) -> void:
     var err = analyzer.write_recovery_bundle(path)
-    var final_path = path
-    if err != OK:
-        final_path = _default_export_dir() + "/BGGremlin-RECOVERY-BUNDLE-%s.zip" % _safe(analyzer.analysis.name)
-        err = analyzer.write_recovery_bundle(final_path)
-    call_deferred("_bundle_done", err, final_path)
+    call_deferred("_bundle_done", err, path)
 
 func _bundle_done(err: int, path: String) -> void:
     if worker and worker.is_started(): worker.wait_to_finish()
     _set_busy(false)
     if err == OK:
-        _set_status("Recovery project ZIP saved.", 100); _show("Recovery project ZIP saved:\n" + (ProjectSettings.globalize_path(path) if path.begins_with("user://") else path))
+        _set_status("Recovery project ZIP saved to selected destination.", 100); _show("Recovery project ZIP saved to the user-visible destination you selected:\n" + path)
     else:
-        _set_status("Recovery project ZIP export failed.", 0); _show("Recovery project ZIP export failed: " + error_string(err))
+        _set_status("Recovery project ZIP export failed.", 0); _show("Recovery project ZIP export failed. Nothing was silently redirected to app-private storage.\n\n" + error_string(err))
 
 func _copy_report() -> void:
     DisplayServer.clipboard_set(analyzer.report_text())

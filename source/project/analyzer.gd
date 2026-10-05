@@ -753,7 +753,7 @@ func export_recovery_project(root_dir: String = "", progress: Callable = Callabl
     var manifest := {
         "format": "BGGremlin APK Recovery Project",
         "format_version": 1,
-        "tool_version": "1.5.1",
+        "tool_version": "1.5.2",
         "source_apk": String(analysis.get("name", "")),
         "source_sha256": String(analysis.get("sha256", "")),
         "source_size": int(analysis.get("size", 0)),
@@ -989,7 +989,7 @@ func _rebuild_guide() -> String:
     var apk_name := String(analysis.get("name", "application.apk"))
     var project := project_output_name()
     var lines: Array[String] = []
-    lines.append("BG Gremlin APK Recovery 1.5.1 — rebuild-oriented export")
+    lines.append("BG Gremlin APK Recovery 1.5.2 — rebuild-oriented export")
     lines.append("")
     lines.append("Project folder: %s" % project)
     lines.append("Source APK: %s" % apk_name)
@@ -1009,7 +1009,7 @@ func _rebuild_guide() -> String:
 
 func _project_readme(extracted_count: int, extracted_bytes: int) -> String:
     var lines: Array[String] = []
-    lines.append("BG Gremlin APK Recovery 1.5.1")
+    lines.append("BG Gremlin APK Recovery 1.5.2")
     lines.append("Background Gremlin Group — don't do evil")
     lines.append("")
     lines.append("This directory is the recovery project for %s." % String(analysis.get("name", "APK")))

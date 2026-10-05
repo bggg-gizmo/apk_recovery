@@ -1,10 +1,10 @@
 # Recovery Output Contract
 
-Each analyzed APK is exported beneath:
+Every analyzed APK receives a deterministic recovery-project root:
 
-`BGGremlinAPKRecovery/Output/<apk-name>_<first-12-sha256>/`
+`<apk-name>_<first-12-sha256>/`
 
-The SHA-qualified folder name separates different APK byte streams even when filenames are reused.
+In v1.5.2 on Android, the user-facing full-project export is a ZIP selected through the native save flow. The ZIP contains this SHA-qualified root and the complete recovery layout below. The analyzer may construct the workspace temporarily under app-private `user://BGGremlinAPKRecovery/Output/`, but that path is internal staging and is never presented as the final user-visible export.
 
 ## raw_apk
 
@@ -38,7 +38,7 @@ Exact `.so` libraries grouped by ABI, plus printable string evidence extracted f
 
 ## obfuscation
 
-Surviving ProGuard/R8 mappings, source maps, symbols, PDB/MDB/debug material, and other artifacts that can help recover naming or source relationships.
+Surviving ProGuard/R8 mappings, source maps, symbols, PDB/MDB/debug material, and other artifacts that can help recover naming or source relationships. Short and minified identifiers are preserved rather than filtered out.
 
 ## binary_evidence
 
@@ -62,6 +62,8 @@ The source APK SHA-256 and output-file SHA-256 inventory.
 
 Machine-readable recovery-project identity, source APK information, extraction counts, and project metadata.
 
-## Portable project ZIP
+## User-visible Android export
 
-`Export Project ZIP` packages the same recovery workspace. On Android, external destinations are selected through the system save flow; `content://` destinations are handled through internal staging and copy-out.
+**Export Full Recovery Project ZIP** and **Export Project ZIP** write the complete recovery workspace to the destination selected through Android's system save flow. `content://` destinations are handled through internal staging and byte copy-out.
+
+There is no silent fallback to app-private storage. If the selected final destination cannot be written, the export is reported as failed.
