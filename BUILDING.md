@@ -1,6 +1,6 @@
-# Building BG Gremlin APK Recovery v1.5.1
+# Building BG Gremlin APK Recovery v1.5.2
 
-BG Gremlin APK Recovery v1.5.1 is built locally. This repository intentionally does not use GitHub Actions.
+BG Gremlin APK Recovery v1.5.2 is built locally. This repository intentionally does not use GitHub Actions.
 
 ## Required toolchain
 
@@ -27,9 +27,7 @@ cd source/project
 
 ## Configure Godot
 
-Install the Godot 4.7.2 stable Android export templates in Godot's normal export-template directory.
-
-In Godot Editor Settings, configure the Android SDK path and JDK 17 path for your machine. Machine-specific SDK and Java paths are not committed.
+Install the Godot 4.7.2 stable Android export templates in Godot's normal export-template directory. Configure the Android SDK and JDK 17 paths in Godot Editor Settings for the build machine. Machine-specific paths and signing material are not committed.
 
 ## Compile-check
 
@@ -42,7 +40,7 @@ The command must complete without a GDScript parse or compile error.
 ## Export unsigned release APK
 
 ```bash
-godot --headless --path . --export-release Android build/BGGremlinAPKRecovery-v1.5.1-unsigned.apk
+godot --headless --path . --export-release Android build/BGGremlinAPKRecovery-v1.5.2-unsigned.apk
 ```
 
 The Android export preset targets:
@@ -57,54 +55,43 @@ With Android Build Tools 36.x:
 
 ```bash
 zipalign -P 16 -f 4 \
-  build/BGGremlinAPKRecovery-v1.5.1-unsigned.apk \
-  build/BGGremlinAPKRecovery-v1.5.1-aligned-unsigned.apk
+  build/BGGremlinAPKRecovery-v1.5.2-unsigned.apk \
+  build/BGGremlinAPKRecovery-v1.5.2-aligned-unsigned.apk
 ```
 
 ## Sign
 
-Use the protected private signing key associated with the Android package if in-place update compatibility matters.
+Sign the aligned APK with the protected production signing key associated with `org.backgroundgremlin.apkrecovery` when update compatibility with installed production builds is required. Production signing material must never be committed to this repository.
+
+## Static validation
+
+Run all of the following against the final signed APK:
 
 ```bash
-apksigner sign \
-  --ks /secure/path/to/keystore \
-  --ks-key-alias YOUR_ALIAS \
-  --out build/BGGremlinAPKRecovery-v1.5.1.apk \
-  build/BGGremlinAPKRecovery-v1.5.1-aligned-unsigned.apk
+apksigner verify --verbose --print-certs build/BGGremlinAPKRecovery-v1.5.2.apk
+zipalign -P 16 -c -v 4 build/BGGremlinAPKRecovery-v1.5.2.apk
+unzip -t build/BGGremlinAPKRecovery-v1.5.2.apk
+scripts/validate_apk.sh build/BGGremlinAPKRecovery-v1.5.2.apk
 ```
 
-Do not commit production or update-compatible private signing material.
+Confirm the exported Android activity is portrait-only, the three expected ABIs are present, and the FileProvider and AndroidX InitializationProvider authorities are unique.
 
-## Validate
+## Android user-visible export acceptance
 
-```bash
-apksigner verify --verbose --print-certs build/BGGremlinAPKRecovery-v1.5.1.apk
-zipalign -P 16 -c -v 4 build/BGGremlinAPKRecovery-v1.5.1.apk
-unzip -t build/BGGremlinAPKRecovery-v1.5.1.apk
-scripts/validate_apk.sh build/BGGremlinAPKRecovery-v1.5.1.apk
-```
+A production release is not accepted until this sequence is completed on a physical Android device or a representative Android emulator:
 
-Confirm the exported Android activity is portrait-only.
+1. Run `adb devices -l` and confirm a test target is attached.
+2. Install the candidate build using the appropriate signing identity for the test scenario.
+3. Analyze a representative APK.
+4. Tap **Export Full Recovery Project ZIP**.
+5. Confirm Android's native save picker opens.
+6. Choose a normal user-visible destination such as Downloads or Documents.
+7. Confirm the resulting ZIP is visible from a standard file manager at that selected destination.
+8. Extract or inspect the ZIP and verify the SHA-qualified project root contains `raw_apk/original.apk`, `raw_apk/tree/`, `rebuild/dex/`, `recovered_sources/`, `framework_payloads/`, `native/`, `obfuscation/`, `binary_evidence/`, `reports/`, `inventories/`, `checksums/`, and `project_manifest.json`.
+9. Test a failed or cancelled export and confirm the application does not claim success and does not silently redirect the user-facing result into app-private `user://` storage.
 
-## Validate recovery export
-
-Analyze a representative APK and run `Export Full Recovery Project`. Confirm that the SHA-qualified project directory contains:
-
-- `raw_apk/original.apk`
-- `raw_apk/tree/`
-- `rebuild/dex/`
-- `recovered_sources/`
-- `framework_payloads/`
-- `native/`
-- `obfuscation/`
-- `binary_evidence/`
-- `reports/`
-- `inventories/`
-- `checksums/`
-- `project_manifest.json`
-
-Run `Export Project ZIP`, copy it through Android's save flow, and verify the resulting archive with a ZIP integrity checker.
+The app may use app-private storage internally while constructing a recovery workspace or staging bytes for a `content://` destination. That internal staging path is not the final user-visible export.
 
 ## Release metadata
 
-The v1.5.1 validation record and SHA-256 values are under `release/v1.5.1/`.
+The v1.5.2 validation record and SHA-256 values are under `release/v1.5.2/`. The record distinguishes static validation from physical-device export validation.
