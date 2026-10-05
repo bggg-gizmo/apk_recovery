@@ -92,6 +92,21 @@ A production release is not accepted until this sequence is completed on a physi
 
 The app may use app-private storage internally while constructing a recovery workspace or staging bytes for a `content://` destination. That internal staging path is not the final user-visible export.
 
+## Release evidence and exact-head rule
+
+A validation result applies only to the exact source/artifact state that produced it. If release-relevant code, export, packaging, or storage behavior changes after a gate ran, rerun the affected head-sensitive gates before promotion.
+
+Keep these evidence classes separate:
+
+- source/import/compile evidence;
+- package, DEX, ZIP, alignment, and signature evidence;
+- emulator or instrumentation evidence;
+- physical-device user-visible export evidence.
+
+A lower evidence class never implies a higher one. A successful ZIP build or `content://` code path does not prove that the saved artifact is visible and usable from an Android file manager.
+
 ## Release metadata
 
 The v1.5.2 validation record and SHA-256 values are under `release/v1.5.2/`. The record distinguishes static validation from physical-device export validation.
+
+The complete release contract is in [docs/RELEASE_GATES.md](docs/RELEASE_GATES.md). Current operational state is in [docs/HANDOFF.md](docs/HANDOFF.md).
