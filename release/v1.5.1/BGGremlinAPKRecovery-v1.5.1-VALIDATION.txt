@@ -1,0 +1,98 @@
+BG Gremlin APK Recovery v1.5.1
+Background Gremlin Group — don't do evil
+Validation date: 2026-10-04
+
+BUILD AND SOURCE
+- Godot engine: 4.7.2 stable: PASS
+- clean source import / GDScript compile: PASS
+- release export from clean working source: PASS
+- Android package: org.backgroundgremlin.apkrecovery: PASS
+- versionName 1.5.1: PASS
+- versionCode 151: PASS
+- committed source contains no private signing key: PASS
+
+PORTRAIT ONLY
+- project.godot display/window/handheld/orientation=1: PASS
+- runtime DisplayServer.screen_set_orientation(DisplayServer.SCREEN_PORTRAIT): PASS
+- exported manifest com.godot.game.GodotApp android:screenOrientation=1: PASS
+
+APK PACKAGING
+- ZIP integrity: PASS
+- zipalign -P 16 -c -v 4: PASS
+- APK Signature Scheme v2: PASS
+- APK Signature Scheme v3: PASS
+- signer subject: CN=Background Gremlin Group, OU=APK Recovery, O=Background Gremlin Group, C=US
+- signer certificate SHA-256: 68cc5caf577ddc7071eca0502f8bbfa1f0704a2b3c95cb5095c59f39e00026dc
+- provider authority org.backgroundgremlin.apkrecovery.fileprovider: present
+- provider authority org.backgroundgremlin.apkrecovery.initprovider: present
+- duplicate provider authority collision: not present
+- packaged ABIs: arm64-v8a, armeabi-v7a, x86_64
+
+DEX
+- classes.dex magic: dex 037: PASS
+- DEX actual size equals declared size: PASS
+- DEX header size 0x70: PASS
+- DEX endian tag 0x12345678: PASS
+- DEX SHA-1 header signature: PASS
+- DEX Adler-32 header checksum: PASS
+- DEX strings: 34247
+- DEX types: 4933
+- DEX prototypes: 8363
+- DEX methods: 33092
+- DEX classes: 3882
+
+RECOVERY / EXPORT INTEGRATION
+- dedicated output root BGGremlinAPKRecovery/Output: implemented
+- deterministic per-project <apk-name>_<first-12-sha256> subfolders: implemented and exercised
+- exact source APK preservation: PASS
+- complete non-directory APK tree extraction: PASS
+- AndroidManifest.xml and resources.arsc rebuild copies: PASS
+- every classes*.dex raw rebuild copy: PASS
+- DEX string export: PASS
+- DEX class/source export: PASS
+- DEX method/signature export: PASS
+- encoded method class_data traversal: PASS
+- exact 16-bit Dalvik code-unit export for reachable code_item entries: PASS
+- obfuscated class/member names preserved as encoded: PASS
+- recovered source/text artifact export: PASS
+- framework payload export: PASS
+- ABI-separated native library export: PASS
+- native printable string evidence export: PASS
+- obfuscation/debug artifact export: PASS
+- binary evidence export: PASS
+- TXT analysis report: PASS
+- HTML analysis report: PASS
+- JSON analysis report: PASS
+- recovery-artifact CSV: PASS
+- APK-structure CSV: PASS
+- DEX-inventory CSV: PASS
+- project_manifest.json: PASS
+- output SHA-256 inventory: PASS
+- complete recovery project ZIP: PASS
+- recovery project ZIP integrity: PASS
+- synthetic end-to-end export created 33 project files with no GDScript runtime errors: PASS
+- source-like JavaScript asset recovery in synthetic test: PASS
+- DEX code-items output in synthetic test: PASS
+- Android content:// project-ZIP staging/copy path: implemented and compile-checked
+
+FUNCTION HUNT / ANALYSIS RETAINED
+- stack detection: retained
+- R8/ProGuard obfuscation heuristic: retained
+- DEX class/method/string search: retained
+- APK filename/text asset search: retained
+- case-insensitive ASCII binary search: retained
+- UTF-16LE binary search: retained
+- ZIP64 parser: retained
+- signing marker diagnostics: retained
+- provider collision diagnostics: retained
+- ZIP alignment diagnostics: retained
+
+LIMITS VERIFIED RATHER THAN HIDDEN
+- A physical Android device/emulator was not attached to this build container, so touch/UI interaction and Android system document-provider writes were not physically exercised here.
+- The signed APK in this release uses a build key created for this 1.5.1 artifact. The original 1.5.0 private signing key was not present in the supplied files. Use the aligned unsigned APK and the original private key for in-place update compatibility with an installation signed by that original key.
+- Deleted source comments, Git history, source-only files, and pre-obfuscation identifiers that are absent from an APK cannot be recreated from nonexistent bytes. v1.5.1 preserves the original DEX/native/framework bytes and exports all parsable bytecode metadata instead of inventing replacements.
+
+SHA-256
+47ba6fb9e6b220a0b0be7945d2eaa9282bc5da38a7349f6f4e2202e623d20b3f  BGGremlinAPKRecovery-v1.5.1.apk
+46f474fbc365dd5ccb525450131312008e4456f86677bf7e2f4bc515cc7bcae4  BGGremlinAPKRecovery-v1.5.1-aligned-unsigned.apk
+6498bf9150eff68d22b210be243b30632dd4e1cc6da5df3e31028fedfaee91cb  BGGremlinAPKRecovery_Godot_Source_v1.5.1.zip
