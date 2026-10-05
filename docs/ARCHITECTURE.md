@@ -1,12 +1,14 @@
 # Architecture
 
-BG Gremlin APK Recovery v1.5.1 is a Godot 4.7.2 Android application with two primary implementation layers.
+BG Gremlin APK Recovery v1.5.2 is a Godot 4.7.2 Android application with two primary implementation layers.
 
 ## UI and orchestration
 
-`main.gd` owns portrait startup, Android document selection, analysis threading, Function Hunt interaction, full-project export, project-ZIP export, report export, and diagnostics presentation.
+`main.gd` owns portrait startup, Android document selection, analysis threading, Function Hunt interaction, user-visible project ZIP export, report export, and diagnostics presentation.
 
-The selected Android `content://` document is staged into app-private storage before ZIP analysis. The source APK remains read-only from the recovery engine's perspective.
+The selected Android `content://` APK is staged into app-private storage before ZIP analysis. The source APK remains read-only from the recovery engine's perspective.
+
+The v1.5.2 primary export action is **Export Full Recovery Project ZIP**. It opens Android's native save flow and supplies the selected destination to the recovery ZIP writer. Report export follows the same no-silent-fallback rule.
 
 ## Recovery engine
 
@@ -21,7 +23,13 @@ The extraction model is preservation-first:
 5. separate surviving source/framework/native/obfuscation evidence;
 6. emit reports and machine-readable inventories;
 7. checksum the recovery workspace;
-8. optionally package the workspace into a portable ZIP.
+8. package the workspace into a portable ZIP for the selected Android destination.
+
+## Android storage boundary
+
+The analyzer can build its SHA-qualified project workspace under app-private `user://BGGremlinAPKRecovery/Output` as an internal implementation detail. When the selected final destination is a `content://` document, the ZIP writer stages the archive internally and then streams the bytes to that document.
+
+App-private storage is not treated as a successful user-facing export destination. v1.5.2 removed the previous silent fallback behavior: if the selected report or project-ZIP destination cannot be written, the UI reports an export failure instead of claiming success for an app-private path.
 
 ## Android export integration
 
