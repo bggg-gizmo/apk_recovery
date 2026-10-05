@@ -7,6 +7,7 @@
 - Removed silent fallback behavior that could report success after redirecting report or project ZIP output into app-private storage. Export failures are surfaced as failures.
 - App-private storage remains only as temporary working/staging space while assembling the recovery project; the user-facing result is copied to the selected Android document destination.
 - Increased Android `versionCode` to `152` and release name to `1.5.2`.
+- Restored a repository-contained application icon asset so the public Godot source checkout is self-contained.
 
 ## 1.5.1 — 2026-10-04
 
