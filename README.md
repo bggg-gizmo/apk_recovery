@@ -7,7 +7,7 @@
 **Background Gremlin Group**  
 *don't do evil*
 
-![Version](https://img.shields.io/badge/version-1.5.1-a6ff00?style=for-the-badge&labelColor=111111)
+![Version](https://img.shields.io/badge/version-1.5.2-a6ff00?style=for-the-badge&labelColor=111111)
 ![Platform](https://img.shields.io/badge/platform-Android-a6ff00?style=for-the-badge&labelColor=111111)
 ![Engine](https://img.shields.io/badge/Godot-4.7.2-a6ff00?style=for-the-badge&labelColor=111111)
 ![Mode](https://img.shields.io/badge/analysis-offline-a6ff00?style=for-the-badge&labelColor=111111)
@@ -76,14 +76,12 @@ The source APK is treated as evidence. Recovery happens into a separate project 
 
 ---
 
-## One APK, one project folder
+## One APK, one recovery-project root
 
-Every analyzed APK is exported beneath its own deterministic directory:
+Every recovery workspace uses its own deterministic SHA-qualified root. In v1.5.2 Android user-facing exports, this root is packaged inside the ZIP chosen through the native save flow:
 
 ```text
-BGGremlinAPKRecovery/
-└── Output/
-    └── <apk-name>_<first-12-sha256>/
+<apk-name>_<first-12-sha256>/
         ├── raw_apk/
         │   ├── original.apk
         │   └── tree/
@@ -110,7 +108,7 @@ BGGremlinAPKRecovery/
         └── project_manifest.json
 ```
 
-This prevents output from separate APKs from being mixed together and makes exported projects reproducible by source SHA-256.
+This keeps output from separate APK byte streams isolated and makes exported projects reproducible by source SHA-256. The app may assemble this workspace in app-private storage before packaging, but that staging path is never presented as the final user-visible export.
 
 See **[Recovery Output Contract](docs/RECOVERY_OUTPUT.md)** for the complete layout.
 
@@ -210,15 +208,15 @@ Static signing diagnostics are intentionally distinguished from cryptographic ve
 
 ## Export modes
 
-### Export Full Recovery Project
+### Export Full Recovery Project ZIP
 
-Creates the complete working recovery directory under the application's output root.
+Opens Android's native save flow and writes the complete recovery project as a portable ZIP to the user-selected destination. The ZIP contains the full SHA-qualified recovery workspace, including the untouched APK, complete packaged tree, DEX rebuild evidence, recovered source/text artifacts, framework payloads, native binaries, reports, inventories, checksums, and rebuild guidance.
 
 ### Export Project ZIP
 
-Packages the full project into a portable ZIP suitable for copying off-device, archiving, or continuing reconstruction on a workstation.
+The secondary project-ZIP action packages the same complete recovery workspace for archiving or transfer to a workstation.
 
-Android `content://` destinations are handled through internal staging and stream copy-out rather than assuming direct filesystem access.
+On Android, `content://` destinations are handled through internal staging and stream copy-out. App-private `user://` storage is an internal working area only; v1.5.2 never reports a user-facing export as successful after silently redirecting it there.
 
 ---
 
@@ -256,8 +254,8 @@ org.backgroundgremlin.apkrecovery
 Current release:
 
 ```text
-Version:      1.5.1
-Version code: 151
+Version:      1.5.2
+Version code: 152
 ```
 
 Full instructions: **[BUILDING.md](BUILDING.md)**
@@ -281,7 +279,8 @@ The repository intentionally uses **no GitHub Actions workflows**. Builds and re
 │   └── RECOVERY_OUTPUT.md
 │
 ├── release/
-│   └── v1.5.1/
+│   ├── v1.5.1/
+│   └── v1.5.2/
 │
 └── source/
     └── project/
